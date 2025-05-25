@@ -7,17 +7,18 @@ import numpy as np
 import pandas as pd
 import datetime as dt
 
+import sys
 
+sys.stdout.reconfigure(encoding='utf-8')
 
 app = dash.Dash(
     __name__,
     meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1"}],
 )
-app.title = "Dashboard energia"
+app.title = "Dashboard Energía"
 
 server = app.server
 app.config.suppress_callback_exceptions = True
-
 
 # Load data from csv
 def load_data():
@@ -41,18 +42,18 @@ def plot_series(data, initial_date, proy):
     data_plot = data_plot[:-(120-proy)]
     fig = go.Figure([
         go.Scatter(
-            name='Demanda energÃ©tica',
+            name='Demanda energética',
             x=data_plot.index,
             y=data_plot['AT_load_actual_entsoe_transparency'],
             mode='lines',
             line=dict(color="#188463"),
         ),
         go.Scatter(
-            name='ProyecciÃ³n',
+            name='Proyección',
             x=data_plot.index,
             y=data_plot['forecast'],
             mode='lines',
-            line=dict(color="#bbffeb",),
+            line=dict(color="#bbffeb"),
         ),
         go.Scatter(
             name='Upper Bound',
@@ -85,18 +86,13 @@ def plot_series(data, initial_date, proy):
             x=1
         ),
         yaxis_title='Demanda total [MW]',
-        #title='Continuous, variable value error bars',
         hovermode="x"
     )
-    #fig = px.line(data2, x='local_timestamp', y="Demanda total [MW]", markers=True, labels={"local_timestamp": "Fecha"})
     fig.update_layout(paper_bgcolor='rgba(0,0,0,0)', plot_bgcolor='rgba(0,0,0,0)', font_color="#2cfec1")
     fig.update_xaxes(showgrid=True, gridwidth=0.25, gridcolor='#7C7C7C')
     fig.update_yaxes(showgrid=True, gridwidth=0.25, gridcolor='#7C7C7C')
-    #fig.update_traces(line_color='#2cfec1')
 
     return fig
-
-
 
 def description_card():
     """
@@ -105,15 +101,13 @@ def description_card():
     return html.Div(
         id="description-card",
         children=[
-            #html.H5("Proyecto 1"),
-            html.H3("PronÃ³stico de producciÃ³n energÃ©tica"),
+            html.H3("Pronóstico de producción energética"),
             html.Div(
                 id="intro",
-                children="Esta herramienta contiene informaciÃ³n sobre la demanda energÃ©tica total en Austria cada hora segÃºn lo pÃºblicado en ENTSO-E Data Portal. Adicionalmente, permite realizar pronÃ³sticos hasta 5 dias en el futuro."
+                children="Esta herramienta contiene información sobre la demanda energética total en Austria cada hora según lo publicado en ENTSO-E Data Portal. Adicionalmente, permite realizar pronósticos hasta 5 días en el futuro."
             ),
         ],
     )
-
 
 def generate_control_card():
     """
@@ -122,7 +116,6 @@ def generate_control_card():
     return html.Div(
         id="control-card",
         children=[
-
             # Fecha inicial
             html.P("Seleccionar fecha y hora inicial:"),
 
@@ -143,16 +136,15 @@ def generate_control_card():
                         style=dict(width='30%')
                     ),
                     
-                    html.P(" ",style=dict(width='5%', textAlign='center')),
+                    html.P(" ", style=dict(width='5%', textAlign='center')),
                     
                     html.Div(
                         id="componente-hora",
                         children=[
                             dcc.Dropdown(
                                 id="dropdown-hora-inicial-hora",
-                                options=[{"label": i, "value": i} for i in np.arange(0,25)],
+                                options=[{"label": i, "value": i} for i in np.arange(0, 25)],
                                 value=pd.to_datetime(max(data.index)-dt.timedelta(days=7)).hour,
-                                # style=dict(width='50%', display="inline-block")
                             )
                         ],
                         style=dict(width='20%')
@@ -163,7 +155,7 @@ def generate_control_card():
 
             html.Br(),
 
-            # Slider proyecciÃ³n
+            # Slider proyección
             html.Div(
                 id="campo-slider",
                 children=[
@@ -179,15 +171,12 @@ def generate_control_card():
                     )
                 ]
             )     
-     
         ]
     )
-
 
 app.layout = html.Div(
     id="app-container",
     children=[
-        
         # Left column
         html.Div(
             id="left-column",
@@ -205,26 +194,21 @@ app.layout = html.Div(
             id="right-column",
             className="eight columns",
             children=[
-
-
-                # Grafica de la serie de tiempo
+                # Gráfica de la serie de tiempo
                 html.Div(
                     id="model_graph",
                     children=[
-                        html.B("Demanda energÃ©tica total en Austria [MW]"),
+                        html.B("Demanda energética total en Austria [MW]"),
                         html.Hr(),
                         dcc.Graph(
                             id="plot_series",  
                         )
                     ],
                 ),
-
-            
             ],
         ),
     ],
 )
-
 
 @app.callback(
     Output(component_id="plot_series", component_property="figure"),
@@ -233,7 +217,6 @@ app.layout = html.Div(
     Input(component_id="slider-proyeccion", component_property="value")]
 )
 def update_output_div(date, hour, proy):
-
     if ((date is not None) & (hour is not None) & (proy is not None)):
         hour = str(hour)
         minute = str(0)
@@ -244,7 +227,6 @@ def update_output_div(date, hour, proy):
         # Graficar
         plot = plot_series(data, initial_date, int(proy))
         return plot
-
 
 # Run the server
 if __name__ == "__main__":
